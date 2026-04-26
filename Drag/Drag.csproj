@@ -43,6 +43,9 @@
     <Content Include="res\ForRestart.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="res\icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="res\PressedRestart.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -66,9 +69,6 @@
     </Content>
     <Resource Include="Back.jpeg" />
     <Resource Include="ForRestart.jpg" />
-    <Resource Include="res\icon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Resource Include="res\Без названия %282%29.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
