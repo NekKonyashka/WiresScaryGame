@@ -16,6 +16,7 @@ namespace Drag
     {
         public bool InMove = false;
         public bool IsConnected = false;
+        private ScaleTransform scaleTransform;
         private RotateTransform rotateTransform;
         private Connecter _begin;
         private Connecter _end;
@@ -32,7 +33,13 @@ namespace Drag
             Object.VerticalAlignment = VerticalAlignment.Top;
             Object.HorizontalAlignment = HorizontalAlignment.Left;
             rotateTransform = new RotateTransform();
-            Object.RenderTransform = rotateTransform;
+            scaleTransform = new ScaleTransform();
+
+            TransformGroup group = new TransformGroup();
+            group.Children.Add(scaleTransform);
+            group.Children.Add(rotateTransform);
+
+            Object.RenderTransform = group;
 
             _begin = begin;
             _end = end;
@@ -41,7 +48,10 @@ namespace Drag
         public void Rotate(double angle)
         {
             rotateTransform.Angle = angle;
-            Debug.WriteLine(rotateTransform.Angle);
+        }
+        public void ScaleX(double value)
+        {
+            scaleTransform.ScaleX = value;
         }
 
         public void SetMargin(double x, double y)
@@ -53,6 +63,7 @@ namespace Drag
         {
             Object.Width = 50;
             Object.Height = 50;
+            scaleTransform.ScaleX = 1;
             rotateTransform.Angle = 0;
         }
     }

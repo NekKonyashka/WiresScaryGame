@@ -5,21 +5,57 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Drag"
         mc:Ignorable="d"
-        Title="Электрик" Height="480" Width="800"
-        Icon="./res/icon.png">
+        Title="Электрик" Height="360" Width="900"
+        Icon="./res/icon.ico">
+    <Window.Background>
+        <ImageBrush ImageSource="/Back.jpeg" Stretch="Fill"/>
+    </Window.Background>
     <Grid x:Name="Window">
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="Restart" Grid.Column="1" Content="restart" HorizontalAlignment="Center" Grid.Row="1" VerticalAlignment="Center" Width="100" Height="100" Grid.RowSpan="2" FontSize="24" Visibility="Hidden" Panel.ZIndex="10" Click="Restart_Click"/>
-        <TextBlock x:Name="Tittle" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="3" TextWrapping="Wrap" Text=" " VerticalAlignment="Bottom" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+        <Button x:Name="Restart" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200" Height="200" FontSize="24" Panel.ZIndex="10" Click="Restart_Click" Grid.RowSpan="3" Background="{x:Null}" Foreground="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0,0,0,0" Focusable="False" Visibility="Hidden">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Image x:Name="img" HorizontalAlignment="Center" VerticalAlignment="Center" Source="/res/Restart.png" Stretch="UniformToFill"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="/res/FocusedRestart.png"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="False">
+                            <Setter TargetName="img" Property="Source" Value="/res/Restart.png"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="img" Property="Source" Value="/res/PressedRestart.png"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+            <Button.Effect>
+                <DropShadowEffect ShadowDepth="10" BlurRadius="15" Opacity="0.5" Color="Black" Direction="180"/>
+            </Button.Effect>
+        </Button>
+        <TextBlock x:Name="Tittle" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="4" TextWrapping="Wrap" Text=" " VerticalAlignment="Bottom" FontSize="24" FontWeight="Bold" Grid.RowSpan="2" Panel.ZIndex="10" Foreground="White"/>
+        <Rectangle x:Name="RestartBAck" Grid.RowSpan="3" Panel.ZIndex="9" Visibility="Hidden" Grid.ColumnSpan="3">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/ForRestart.jpg" Stretch="Fill"/>
+            </Rectangle.Fill>
+            <Rectangle.Effect>
+                <DropShadowEffect ShadowDepth="10" BlurRadius="20" Opacity="0.7"/>
+            </Rectangle.Effect>
+        </Rectangle>
+        <Rectangle x:Name="Screamer" Grid.RowSpan="3" Grid.ColumnSpan="3" Panel.ZIndex="15" Visibility="Hidden">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/screamer.jpg"/>
+            </Rectangle.Fill>
+        </Rectangle>
+
     </Grid>
 </Window>

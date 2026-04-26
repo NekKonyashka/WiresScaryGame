@@ -6,10 +6,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>res\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="res\icon.png" />
+    <None Remove="Back.jpeg" />
+    <None Remove="ForRestart.jpg" />
+    <None Remove="res\0984c1d48eb11ef.wav" />
+    <None Remove="res\Back.jpeg" />
+    <None Remove="res\FocusedRestart.png" />
+    <None Remove="res\ForRestart.jpg" />
+    <None Remove="res\icon.ico" />
+    <None Remove="res\PressedRestart.png" />
+    <None Remove="res\Restart.png" />
+    <None Remove="res\Sprites.png" />
     <None Remove="res\with-applause.wav" />
     <None Remove="res\zvuk_-_muzhskoj_krik.wav" />
     <None Remove="screamer.jpg" />
@@ -18,7 +28,31 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="res\Back.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="res\0984c1d48eb11ef.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\FocusedRestart.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\ForRestart.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\PressedRestart.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\Restart.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="res\screamer.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="res\Sprites.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="res\with-applause.wav">
@@ -30,7 +64,9 @@
     <Content Include="res\zvuk_-_muzhskoj_krik.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="res\icon.png">
+    <Resource Include="Back.jpeg" />
+    <Resource Include="ForRestart.jpg" />
+    <Resource Include="res\icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="res\Без названия %282%29.jpg">
