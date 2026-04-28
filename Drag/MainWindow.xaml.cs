@@ -12,14 +12,13 @@ namespace Drag
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int _frameIndex = 0;
         private TaskCompletionSource<bool> _endAnimTask;
-        private BitmapImage _bitmap;
-        private DateTime _lastFrame;
         private List<Rectangle> _items;
-        private Image _currentSprite;
 
-        public Manager Manager;
+
+        private Manager _manager;
+        private AnimationManager _animationManager;
+
         public Task<bool> CurrentTask => _endAnimTask.Task;
         private string[] tittles =
         {
@@ -33,20 +32,34 @@ namespace Drag
         {
             InitializeComponent();
             _items = new List<Rectangle>();
-            _bitmap = new BitmapImage(new Uri("./res/Images/Sprites.png", UriKind.Relative));
             ResizeMode = ResizeMode.NoResize;
-            Manager = new Manager(this);
+           _manager = new Manager();
+            _animationManager = new AnimationManager();
 
-            Manager.AllConnected += Manager_AllConnected;
-            Manager.OnConnecting += Manager_OnConnecting;
-            Manager.OnFail += Manager_OnFail;
-            Manager.OnGameObjectCreated += AddItem;
-            Manager.AnimationRequested += EndAnim;
+            _animationManager.OnAnimationStart += _animationManager_OnAnimationStart;
+            _animationManager.OnAnimationEnd += _animationManager_OnAnimationEnd;
+
+            _manager.AllConnected += Manager_AllConnected;
+            _manager.OnConnecting += Manager_OnConnecting;
+            _manager.OnFail += Manager_OnFail;
+            _manager.OnGameObjectCreated += AddItem;
+            _manager.AnimationRequested += EndAnim;
 
             Loaded += (s, e) =>
             {
-                Manager.Initialize(Window.ColumnDefinitions.Count, Window.RowDefinitions.Count);
+                _manager.Initialize(Window.ColumnDefinitions.Count, Window.RowDefinitions.Count);
             };
+        }
+
+        private void _animationManager_OnAnimationEnd(object? sender, EventArgs e)
+        {
+            _endAnimTask.SetResult(true);
+            Window.Children.Remove(_animationManager.Image);
+        }
+
+        private void _animationManager_OnAnimationStart(object? sender, EventArgs e)
+        {
+            _endAnimTask = new TaskCompletionSource<bool>();
         }
 
         private void AddItem(object? sender,ObjectInfoEventArgs e)
@@ -64,56 +77,22 @@ namespace Drag
 
         private void Manager_OnConnecting(object? sender, OnConnectedEventArgs e)
         {
-            StartAnim();
             Tittle.Foreground = Brushes.White;
             Tittle.Text = tittles[new Random().Next(tittles.Length)];
-            Image sprite = new Image()
-            {
-                Width = _bitmap.Width / 2,
-                Height = _bitmap.Height / 2,
-                Stretch = Stretch.Fill,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-            _currentSprite = sprite;
-            Grid.SetColumn(sprite, e.End_pos.X);
-            Grid.SetRow(sprite, e.End_pos.Y);
-            Canvas.SetZIndex(sprite, 10);
-            Window.Children.Add(sprite);
-            _lastFrame = DateTime.Now;
 
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
-            EndAnim();
+            Grid.SetColumn(_animationManager.Image, e.End_pos.X);
+            Grid.SetRow(_animationManager.Image, e.End_pos.Y);
+            Window.Children.Add(_animationManager.Image);
+
+            _animationManager.Start();
         }
 
         private async Task EndAnim()
         {
             await _endAnimTask.Task;
-            CompositionTarget.Rendering -= CompositionTarget_Rendering;
-            Window.Children.Remove(_currentSprite);
+            await Task.Delay(150);
         }
 
-        private void CompositionTarget_Rendering(object? sender, EventArgs e)
-        {
-            if ((DateTime.Now - _lastFrame).TotalMilliseconds > 100)
-            {
-                if (_frameIndex == 4)
-                {
-                    _frameIndex = 0;
-                    _endAnimTask?.SetResult(true);
-                }
-                int x = (int)((_frameIndex % 2 == 0 ? 0 : 1) * (_bitmap.Width / 2));
-                int y = (int)((_frameIndex / 2) * (_bitmap.Height / 2));
-
-                CroppedBitmap cropped = new CroppedBitmap(_bitmap,
-                    new Int32Rect(x, y, (int)(_bitmap.Width / 2), (int)(_bitmap.Height / 2)));
-
-                _currentSprite.Source = cropped;
-
-                _lastFrame = DateTime.Now;
-                _frameIndex++;
-            }
-        }
         public void StartAnim()
         {
             _endAnimTask = new TaskCompletionSource<bool>();
@@ -163,21 +142,21 @@ namespace Drag
             {
                 Window.Children.Remove(item);
             }
-            if (Manager.Amount % 4 == 0 && Window.RowDefinitions.Count < 6)
+            if (_manager.Amount % 4 == 0 && Window.RowDefinitions.Count < 6)
             {
                 AddRow();
-                Manager.PlaySound("upgrade");
+                _manager.PlaySound("upgrade");
                 Grid.SetRowSpan(Restart,Window.RowDefinitions.Count);
                 Grid.SetRowSpan(RestartBAck, Window.RowDefinitions.Count);
                 Grid.SetRowSpan(Screamer, Window.RowDefinitions.Count);
                 Height += 120;
             }
-            Manager.Reset(Window.ColumnDefinitions.Count,Window.RowDefinitions.Count);
+            _manager.Reset(Window.ColumnDefinitions.Count,Window.RowDefinitions.Count);
         }
 
         private void Window_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            Manager.ConnectionCheck(sender);
+            _manager.ConnectionCheck(sender);
         }
     }
 }

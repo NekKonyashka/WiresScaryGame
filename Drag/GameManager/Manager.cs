@@ -28,7 +28,7 @@ namespace Drag
         private Dictionary<string, SoundPlayer> _sounds;
         private Dictionary<int, Brush> _brushes;
 
-        public Manager(MainWindow mainWindow)
+        public Manager()
         {
             _connecterPairs = new Dictionary<Brush, ConnecterPairs>();
 

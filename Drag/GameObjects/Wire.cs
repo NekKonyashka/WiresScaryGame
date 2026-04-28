@@ -48,11 +48,6 @@ namespace Drag
             scaleTransform.ScaleX = value;
         }
 
-        public void SetMargin()
-        {
-
-        }
-
         public void Reset()
         {
             Object.Width = 50;
