@@ -1,55 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Media;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Drag
 {
     public class Manager
     {
+        private int _connectedWires = 0;
         private int amountOfУспех = 0;
+
         private Random random;
-        private MainWindow _window;
-        private Grid _grid;
         private List<Wire> _wires;
-        private Dictionary<Brush, ConnecterPairs> _connecterPairs;
         private Wire _currentWire;
-        private static int _connectedWires = 0;
-        private SoundPlayer _soundPlayer;
-        private SoundPlayer _winPlayer;
 
         public int Amount => amountOfУспех;
 
         public event EventHandler AllConnected;
         public event EventHandler<OnConnectedEventArgs> OnConnecting;
         public event EventHandler OnFail;
+        public event EventHandler<ObjectInfoEventArgs> OnGameObjectCreated;
+        public event Func<Task> AnimationRequested;
 
+        private Dictionary<Brush, ConnecterPairs> _connecterPairs;
+        private Dictionary<string, SoundPlayer> _sounds;
         private Dictionary<int, Brush> _brushes;
 
         public Manager(MainWindow mainWindow)
         {
-            _soundPlayer = new SoundPlayer("./res/zvuk-jelektroshoker.wav");
-            _winPlayer = new SoundPlayer("./res/with-applause.wav");
-
             _connecterPairs = new Dictionary<Brush, ConnecterPairs>();
-
-            _window = mainWindow;
-            _grid = mainWindow.Window;
-            _window.MouseUp += _window_MouseUp;
 
             _wires = new List<Wire>();
             random = new Random();
             Дальтоник();
+            LoadSounds();
+        }
+
+        private void LoadSounds()
+        {
+            _sounds = new()
+            {
+                ["fail"] = new SoundPlayer("./res/Sounds/zvuk_-_muzhskoj_krik.wav"),
+                ["connect"] = new SoundPlayer("./res/Sounds/zvuk-jelektroshoker.wav"),
+                ["win"] = new SoundPlayer("./res/Sounds/with-applause.wav"),
+                ["upgrade"] = new SoundPlayer("./res/Sounds/0984c1d48eb11ef.wav"),
+                ["took"] = new SoundPlayer("./res/Sounds/11986c2f439eb45.wav")
+            };
+
+            foreach(var sound in _sounds.Values)
+            {
+                sound.LoadAsync();
+            }
         }
 
         private void Дальтоник()
@@ -61,24 +64,24 @@ namespace Drag
             }
         }
 
-        private void _window_MouseUp(object sender, MouseButtonEventArgs e)
+        public void ConnectionCheck(object sender)
         {
             if(_currentWire != null)
             {
+                MainWindow _window = sender as MainWindow;
                 var begin = _currentWire.Begin.Object;
                 var end = _currentWire.End.Object;
 
                 Point end_pos = end.TranslatePoint(new Point(), _window);
                 Point begin_pos = begin.TranslatePoint(new Point(), _window);
-                Point mouse_pos = e.GetPosition(_window);
+                Point mouse_pos = Mouse.GetPosition(_window);
                 _currentWire.InMove = false;
                 if (mouse_pos.X - end_pos.X > end.Width / 8 &&
                     mouse_pos.X - end_pos.X < end.Width / 2 + end.Width / 4 &&
                     mouse_pos.Y - end_pos.Y > end.Height / 8 &&
                     mouse_pos.Y - end_pos.Y < end.Height / 2 + end.Width / 4)
                 {
-                    _soundPlayer.SoundLocation = "./res/zvuk-jelektroshoker.wav";
-                    _soundPlayer.Play();
+                    PlaySound("connect");
 
                     double length = end_pos.X - begin_pos.X;
                     double height = end_pos.Y - begin_pos.Y;
@@ -92,23 +95,19 @@ namespace Drag
                     OnConnecting?.Invoke(this, new OnConnectedEventArgs(_currentWire.End.Position));
 
                     Canvas.SetZIndex(_currentWire.Object, _connectedWires);
-                    _window.UpdateLayout();
 
-                    if (IsAllConnected())
+                    if (IsAllConnected(_window.Window.RowDefinitions.Count))
                     {
                         amountOfУспех++;
-
                         Win();
                         AllConnected?.Invoke(this, null);
                     }
                 }
                 else
                 {
-                    OnFail?.Invoke(this, null);
-                    ShakeShakeMilkShakeкокакола67();
+                    PlaySound("fail");
 
-                    _soundPlayer.SoundLocation = "./res/zvuk_-_muzhskoj_krik.wav";
-                    _soundPlayer.Play();
+                    OnFail?.Invoke(this, null);
 
                     _currentWire.Reset();
                 }
@@ -116,112 +115,98 @@ namespace Drag
             }
         }
 
+        public void PlaySound(string key)
+        {
+            if(_sounds.TryGetValue(key,out var player))
+            {
+                player.Play();
+            }
+        }
         private async void Win()
         {
-            await _window.StartAnim();
-            await Task.Delay(100);
-            _winPlayer.Play();
+            await AnimationRequested?.Invoke();
+            PlaySound("win");
         }
 
-        public void Upgrade()
-        {
-            _soundPlayer.SoundLocation = "./res/0984c1d48eb11ef.wav";
-            _soundPlayer.Play();
-        }
 
-        private async void ShakeShakeMilkShakeкокакола67()
-        {
-            var current = _window.Screamer.Fill;
-            _window.Screamer.Visibility = Visibility.Visible;
-            for (int i = 0; i < 50; i++)
-            {
-                int x_shift = random.Next(-5, 6);
-                int y_shift = random.Next(-5, 6);
-
-                _window.Screamer.Fill = i % 2 == 0 ? Brushes.Black : current;
-
-
-                _window.Left += x_shift;
-                _window.Top += y_shift;
-
-                await Task.Delay(1);
-            }
-            _window.Screamer.Visibility = Visibility.Hidden;
-        }
-
-        public void Reset()
+        public void Reset(int columns,int rows)
         {
             _wires.Clear();
             _connecterPairs.Clear();
             _connectedWires = 0;
-            Initialize();
+            Initialize(columns,rows);
         }
 
-        private bool IsAllConnected()
+        private bool IsAllConnected(int rows)
         {
-            return _connectedWires == _grid.RowDefinitions.Count;
+            return _connectedWires == rows;
         }
 
-        public void Initialize()
+        public void Initialize(int columns,int rows)
         {
-            InitilizeBegins();
-            InitializeEnds();
-            InitializeWires();
+            InitilizeBegins(rows);
+            InitializeEnds(columns,rows);
+            InitializeWires(columns,rows);
         }
 
-        private void InitilizeBegins()
+        private void InitilizeBegins(int rows)
         {
             var shuffled = _brushes.OrderBy(x => random.Next()).ToList();
-            for (int i = 0; i < _grid.RowDefinitions.Count; i++)
+            for (int i = 0; i < rows; i++)
             {
                 Connecter begin = new Connecter(new VectorPoint(0, i), shuffled[i].Value);
                 begin.Object.MouseDown += Object_MouseDown;
-                _window.AddItem(begin.Object);
+                OnGameObjectCreated?.Invoke(this, new ObjectInfoEventArgs(begin.Object));
 
                 _connecterPairs[shuffled[i].Value] = new ConnecterPairs() { Begin = begin };
             }
         }
 
-        private void InitializeEnds()
+        private void InitializeEnds(int columns,int row)
         {
             var shuffled = _brushes.OrderBy(x => random.Next()).ToList();
-            for (int i = 0,count = 0; i < _brushes.Count && count < _grid.RowDefinitions.Count; i++)
+            for (int i = 0,count = 0; i < _brushes.Count && count < row; i++)
             {
                 if (!_connecterPairs.ContainsKey(shuffled[i].Value))
                 {
                     continue;
                 }
-                Connecter end = new Connecter(new VectorPoint(_grid.ColumnDefinitions.Count - 1, count), shuffled[i].Value);
-                _window.AddItem(end.Object);
+                Connecter end = new Connecter(new VectorPoint(columns - 1, count), shuffled[i].Value);
+                OnGameObjectCreated?.Invoke(this,new ObjectInfoEventArgs(end.Object));
 
                 _connecterPairs[shuffled[i].Value].End = end;
                 count++;
             }
         }
 
-        private void InitializeWires()
+        private void InitializeWires(int columns,int row)
         {
             for(int i = 0; i < _brushes.Count; i++)
             {
-                if (!_connecterPairs.ContainsKey(_brushes[i])) continue;
+                if (!_connecterPairs.ContainsKey(_brushes[i]))
+                {
+                    continue;
+                }
+
                 var begin = _connecterPairs[_brushes[i]].Begin;
                 var end = _connecterPairs[_brushes[i]].End;
 
                 Wire wire = new Wire(begin, end,new VectorPoint(0,begin.Position.Y));
                 _wires.Add(wire);
 
-                Grid.SetColumnSpan(wire.Object, _grid.ColumnDefinitions.Count);
-                Grid.SetRowSpan(wire.Object, _grid.RowDefinitions.Count);
+                Grid.SetColumnSpan(wire.Object, columns);
+                Grid.SetRowSpan(wire.Object, row);
 
-                var begin_pos = begin.Object.TranslatePoint(new Point(), _window);
-                wire.SetMargin(begin_pos.X, begin_pos.Y);
-
-                _window.AddItem(wire.Object);
+                OnGameObjectCreated?.Invoke(this, new ObjectInfoEventArgs(wire.Object));
             }
         }
         private void Object_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            PlaySound("took");
+
             Rectangle current = sender as Rectangle;
+            Grid parent = current.Parent as Grid;
+
             _currentWire = GetWire(current);
             if (_currentWire.IsConnected == true)
             {
@@ -229,9 +214,9 @@ namespace Drag
                 return;
             }
             _currentWire.InMove = true;
-            Drag(_currentWire);
+            Drag(parent, _currentWire);
         }
-        public Wire GetWire(Rectangle rectangle)
+        private Wire GetWire(Rectangle rectangle)
         {
             foreach(var wire in _wires)
             {
@@ -242,28 +227,30 @@ namespace Drag
             }
             return null;
         }
-        private async void Drag(Wire wire)
+        private async void Drag(Grid _grid,Wire wire)
         {
-            if (!wire.InMove) return;
+            if (!wire.InMove)
+            {
+                return;
+            }
+
             Canvas.SetZIndex(wire.Object, _connectedWires + 1);
             double length = 0;
             double height = 0;
             double distance = 0;
             double rows = wire.Position.Y * _grid.RowDefinitions[0].ActualHeight;
-            Point wire_pos = wire.Object.TranslatePoint(new Point(), _window);
+            Point wire_pos = wire.Object.TranslatePoint(new Point(), _grid);
             Point mouse_pos;
             while (wire.InMove)
             {
-                mouse_pos = Mouse.GetPosition(_window);
+                mouse_pos = Mouse.GetPosition(_grid);
                 length = mouse_pos.X - wire.Object.Margin.Left;
-                height = mouse_pos.Y - rows - wire.Object.Margin.Top - 25;
+                height = mouse_pos.Y - rows - wire.Object.Margin.Top - wire.Object.Height / 2;
 
                 distance = Math.Sqrt(Math.Pow(Math.Abs(length), 2) + Math.Pow(Math.Abs(height), 2));
-                Debug.WriteLine($"Длина - {length}\nВысота - {height}\nРасстояние - {distance}");
-                Debug.WriteLine($"Координата мыши - {mouse_pos.X},{mouse_pos.Y}");
 
                 wire.Rotate(Math.Atan2(height, length) * 180 / Math.PI);
-                wire.ScaleX(Math.Max(distance + 25, 1) / wire.Object.Width);
+                wire.ScaleX(Math.Max(distance + wire.Object.Height / 2, 1) / wire.Object.Width);
 
                 await Task.Delay(16);
             }

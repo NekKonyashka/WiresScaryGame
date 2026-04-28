@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:Drag"
         mc:Ignorable="d"
         Title="Электрик" Height="360" Width="900"
-        Icon="./res/icon.ico">
+        Icon="/res/Icon/icon.ico" MouseUp="Window_MouseUp">
     <Window.Background>
-        <ImageBrush ImageSource="/Back.jpeg" Stretch="Fill"/>
+        <ImageBrush ImageSource="/res/Images/Backgrounds/Back.jpeg" Stretch="Fill"/>
     </Window.Background>
     <Grid x:Name="Window">
         <Grid.RowDefinitions>
@@ -24,16 +24,16 @@
         <Button x:Name="Restart" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200" Height="200" FontSize="24" Panel.ZIndex="10" Click="Restart_Click" Grid.RowSpan="3" Background="{x:Null}" Foreground="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0,0,0,0" Focusable="False" Visibility="Hidden">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
-                    <Image x:Name="img" HorizontalAlignment="Center" VerticalAlignment="Center" Source="/res/Restart.png" Stretch="UniformToFill"/>
+                    <Image x:Name="img" HorizontalAlignment="Center" VerticalAlignment="Center" Source="/res/Images/ButtonSprites/Restart.png" Stretch="UniformToFill"/>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="/res/FocusedRestart.png"/>
+                            <Setter TargetName="img" Property="Source" Value="/res/Images/ButtonSprites/FocusedRestart.png"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="False">
-                            <Setter TargetName="img" Property="Source" Value="/res/Restart.png"/>
+                            <Setter TargetName="img" Property="Source" Value="/res/Images/ButtonSprites/Restart.png"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="img" Property="Source" Value="/res/PressedRestart.png"/>
+                            <Setter TargetName="img" Property="Source" Value="/res/Images/ButtonSprites/PressedRestart.png"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -45,7 +45,7 @@
         <TextBlock x:Name="Tittle" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="4" TextWrapping="Wrap" Text=" " VerticalAlignment="Bottom" FontSize="24" FontWeight="Bold" Grid.RowSpan="2" Panel.ZIndex="10" Foreground="White"/>
         <Rectangle x:Name="RestartBAck" Grid.RowSpan="3" Panel.ZIndex="9" Visibility="Hidden" Grid.ColumnSpan="3">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="/ForRestart.jpg" Stretch="Fill"/>
+                <ImageBrush ImageSource="/res/Images/Backgrounds/ForRestart.jpg" Stretch="Fill"/>
             </Rectangle.Fill>
             <Rectangle.Effect>
                 <DropShadowEffect ShadowDepth="10" BlurRadius="20" Opacity="0.7"/>
@@ -53,7 +53,7 @@
         </Rectangle>
         <Rectangle x:Name="Screamer" Grid.RowSpan="3" Grid.ColumnSpan="3" Panel.ZIndex="15" Visibility="Hidden">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="/screamer.jpg"/>
+                <ImageBrush ImageSource="/res/Images/Backgrounds/screamer.jpg"/>
             </Rectangle.Fill>
         </Rectangle>
 

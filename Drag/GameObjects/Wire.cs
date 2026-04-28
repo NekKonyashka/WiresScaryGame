@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Drag
 {
@@ -25,13 +17,6 @@ namespace Drag
         public Connecter End => _end;
         public Wire(Connecter begin,Connecter end,VectorPoint point) : base(point)
         {
-            Canvas.SetZIndex(Object, -1);
-            Object.Width = 50;
-            Object.Height = 50;
-            Object.Fill = begin.Object.Fill;
-            Object.RenderTransformOrigin = new Point(0, 0.5);
-            Object.VerticalAlignment = VerticalAlignment.Top;
-            Object.HorizontalAlignment = HorizontalAlignment.Left;
             rotateTransform = new RotateTransform();
             scaleTransform = new ScaleTransform();
 
@@ -39,10 +24,19 @@ namespace Drag
             group.Children.Add(scaleTransform);
             group.Children.Add(rotateTransform);
 
-            Object.RenderTransform = group;
-
             _begin = begin;
             _end = end;
+
+            Object.Margin = new Thickness(Begin.Object.Width / 2, Begin.Object.Height / 4, 0, 0);
+            Object.Width = 50;
+            Object.Height = 50;
+            Object.Fill = begin.Object.Fill;
+            Object.RenderTransformOrigin = new Point(0, 0.5);
+            Object.VerticalAlignment = VerticalAlignment.Top;
+            Object.HorizontalAlignment = HorizontalAlignment.Left;
+            Object.RenderTransform = group;
+
+            Canvas.SetZIndex(Object, -1);
         }
 
         public void Rotate(double angle)
@@ -54,9 +48,9 @@ namespace Drag
             scaleTransform.ScaleX = value;
         }
 
-        public void SetMargin(double x, double y)
+        public void SetMargin()
         {
-            Object.Margin = new Thickness(x + Begin.Object.Width / 2, y + Begin.Object.Height / 4, 0, 0);
+
         }
 
         public void Reset()
